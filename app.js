@@ -4,7 +4,7 @@ const API_BASE_URL = 'https://ticketmaster-backend-8icp.onrender.com';
 const apiURL = path => `${API_BASE_URL}${path}`;
 const state = {
   events: [], favorites: [], orders: [], notifications: [], listings: [], profile: null,
-  view: 'discover', ticketTab: 'upcoming', category: 'All', search: '', location: 'Lagos',
+  view: 'flights', ticketTab: 'upcoming', category: 'All', search: '', location: 'Lagos',
   selectedEvent: null, selectedType: null, selectedSeats: [], quantity: 1, currentOrder: null,
   submitting: false, toastTimer: null, authToken: '', authRefreshToken: '', authUser: null,
   recoveryTokens: null, reservedSeats: [],
@@ -81,6 +81,7 @@ async function showDashboard(user) {
   state.authUser = user;
   $('#authScreen').hidden = true;
   $('.app-shell').hidden = false;
+  navChange('flights');
   try { await refreshData(); }
   catch (error) {
     if (error.status === 401) {
@@ -160,6 +161,7 @@ function navChange(view) {
   state.view = allowed.includes(view) ? view : 'discover';
   $$('.view').forEach(section => section.classList.toggle('active', section.id === `view-${state.view}`));
   $$('[data-nav]').forEach(button => button.classList.toggle('active', button.dataset.nav === state.view));
+  document.body.classList.toggle('flights-view', state.view === 'flights');
   $('#notificationsPopover').hidden = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (state.view === 'tickets') renderTickets();

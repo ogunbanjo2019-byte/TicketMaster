@@ -57,15 +57,15 @@
 
   <div class="app-shell" hidden>
     <header class="topbar">
-      <a class="brand" href="#discover" data-nav="discover" aria-label="TicketMaster home">
+      <a class="brand" href="#flights" data-nav="flights" aria-label="TicketMaster Flights home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4.5a2 2 0 0 1 3-1.7l5.2 3.1 5.1-3.1a2 2 0 0 1 3 1.7v4.1a4.1 4.1 0 0 1 0 8.2v10.7a2 2 0 0 1-3 1.7l-5.1-3.1-5.2 3.1a2 2 0 0 1-3-1.7V16.8a4.1 4.1 0 0 1 0-8.2V4.5Z" fill="currentColor"/><path d="m16 6.5 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L16 6.5Z" fill="#fff"/></svg></span>
         <span class="brand-word">Ticket<span>Pro</span></span>
       </a>
       <nav class="desktop-nav" aria-label="Main navigation">
-        <button class="nav-link active" data-nav="discover"><span class="nav-icon">⌂</span>Discover</button>
+        <button class="nav-link" data-nav="discover"><span class="nav-icon">⌂</span>Discover</button>
         <button class="nav-link" data-nav="tickets"><span class="nav-icon">▣</span>My tickets</button>
         <button class="nav-link" data-nav="favorites"><span class="nav-icon">♡</span>Favorites</button>
-        <button class="nav-link" data-nav="flights"><span class="nav-icon">✈</span>Flights</button>
+        <button class="nav-link active" data-nav="flights"><span class="nav-icon">✈</span>Flights</button>
       </nav>
       <label class="search-box" aria-label="Search events">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.2 4.2"/></svg>
@@ -81,15 +81,15 @@
     </header>
 
     <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
-      <button class="mobile-nav-item active" data-nav="discover"><span>⌂</span>Explore</button>
+      <button class="mobile-nav-item" data-nav="discover"><span>⌂</span>Explore</button>
       <button class="mobile-nav-item" data-nav="tickets"><span>▣</span>Tickets</button>
       <button class="mobile-nav-item" data-nav="favorites"><span>♡</span>Saved</button>
-      <button class="mobile-nav-item" data-nav="flights"><span>✈</span>Flights</button>
+      <button class="mobile-nav-item active" data-nav="flights"><span>✈</span>Flights</button>
       <button class="mobile-nav-item" data-nav="account"><span>◉</span>Account</button>
     </nav>
 
     <main class="main-content">
-      <section class="view active" id="view-discover" aria-labelledby="discoverTitle">
+      <section class="view" id="view-discover" aria-labelledby="discoverTitle">
         <div class="welcome-row">
           <div><p class="eyebrow">MONDAY, NOVEMBER 23, 2026 <span class="eyebrow-line"></span> <span id="currentLocation">LAGOS</span></p><h1 id="discoverTitle">Find your <em>next</em> live moment.</h1><p class="welcome-copy">Big nights, brilliant seats, and memories waiting to happen.</p></div>
           <button class="outline-button location-large" id="locationButtonLarge"><span>⌖</span> <span id="locationLong">Lagos</span> <span class="chevron">⌄</span></button>
@@ -117,7 +117,7 @@
         <section class="trust-strip" aria-label="TicketMaster benefits"><div><span class="trust-icon">✓</span><span><strong>Every ticket verified</strong><small>Book with confidence</small></span></div><div><span class="trust-icon">↗</span><span><strong>Easy ticket transfers</strong><small>Plans change. Sharing is easy.</small></span></div><div><span class="trust-icon">♡</span><span><strong>Memories first</strong><small>We’ll handle the details</small></span></div></section>
       </section>
 
-      <section class="view" id="view-flights" aria-labelledby="flightsTitle">
+      <section class="view active" id="view-flights" aria-labelledby="flightsTitle">
         <div class="flight-page-heading">
           <p class="eyebrow blue">GLOBAL FLIGHT SEARCH · TEST MODE</p>
           <h1 id="flightsTitle">Find a flight anywhere.</h1>
