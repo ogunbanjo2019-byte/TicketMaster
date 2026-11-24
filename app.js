@@ -7,7 +7,8 @@ const state = {
   view: 'discover', ticketTab: 'upcoming', category: 'All', search: '', location: 'Lagos',
   selectedEvent: null, selectedType: null, selectedSeats: [], quantity: 1, currentOrder: null,
   submitting: false, toastTimer: null, authToken: '', authRefreshToken: '', authUser: null,
-  recoveryTokens: null, reservedSeats: []
+  recoveryTokens: null, reservedSeats: [],
+  flight: { origin: null, destination: null, offers: [] }
 };
 const money = value => `$${Number(value || 0).toFixed(2)}`;
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -155,7 +156,7 @@ async function signOut() {
 function findEvent(id) { return state.events.find(event => event.id === id); }
 function orderEvent(order) { return findEvent(order.eventId) || state.events.find(event => event.shortTitle === order.title) || state.events[0]; }
 function navChange(view) {
-  const allowed = ['discover', 'tickets', 'favorites', 'account', 'notifications'];
+  const allowed = ['discover', 'tickets', 'favorites', 'account', 'notifications', 'flights'];
   state.view = allowed.includes(view) ? view : 'discover';
   $$('.view').forEach(section => section.classList.toggle('active', section.id === `view-${state.view}`));
   $$('[data-nav]').forEach(button => button.classList.toggle('active', button.dataset.nav === state.view));
@@ -309,6 +310,13 @@ function fillProfile() {
   }
   $('#profileName').textContent = `${state.profile.firstName} ${state.profile.lastName}`;
   $('#profileEmail').textContent = state.profile.email;
+  const initials = [state.profile.firstName, state.profile.lastName]
+    .filter(Boolean)
+    .map(name => String(name).trim().charAt(0))
+    .join('')
+    .toUpperCase() || 'TM';
+  $('#avatarInitials').textContent = initials;
+  $('#profileInitials').textContent = initials;
 }
 async function refreshData() {
   const [events, favorites, orders, notifications, profile] = await Promise.all([
@@ -358,6 +366,175 @@ async function markAllRead() {
   notify('All notifications marked as read.');
 }
 
+const flightSuggestionTimers = { origin: null, destination: null };
+const flightSuggestionRequestIds = { origin: 0, destination: 0 };
+
+function placeInput(field) { return $(`#flight${field === 'origin' ? 'Origin' : 'Destination'}`); }
+function placeList(field) { return $(`#flight${field === 'origin' ? 'Origin' : 'Destination'}Suggestions`); }
+function localDateValue(date) {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+function showFlightStatus(message, kind = '') {
+  const element = $('#flightSearchStatus');
+  element.textContent = message;
+  element.className = `flight-search-status${kind ? ` ${kind}` : ''}`;
+  element.hidden = !message;
+}
+function formatFlightTime(value) {
+  const text = String(value || '');
+  const match = text.match(/T(\d{2}:\d{2})/);
+  return match ? match[1] : '—';
+}
+function formatFlightDate(value) {
+  if (!value) return 'Date not supplied';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? String(value).slice(0, 10) : parsed.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function formatFlightDuration(value) {
+  const match = String(value || '').match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/);
+  if (!match) return value || 'Duration unavailable';
+  const hours = Number(match[1] || 0);
+  const minutes = Number(match[2] || 0);
+  return [hours ? `${hours}h` : '', minutes ? `${minutes}m` : ''].filter(Boolean).join(' ') || 'Under 1m';
+}
+function formatFlightPrice(amount, currency) {
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(Number(amount));
+  } catch {
+    return `${currency || ''} ${amount || ''}`.trim();
+  }
+}
+function renderFlightOffers(offers) {
+  const container = $('#flightResults');
+  if (!offers.length) {
+    container.innerHTML = '<div class="flight-empty-state"><strong>No test offers were returned.</strong><span>Try another route or later dates. Test-mode availability can differ from live airline inventory.</span></div>';
+    return;
+  }
+  container.innerHTML = offers.map(offer => {
+    const legs = (offer.slices || []).map((slice, index) => {
+      const segments = slice.segments || [];
+      const first = segments[0] || {};
+      const last = segments[segments.length - 1] || {};
+      const from = first.origin?.iata_code || '—';
+      const to = last.destination?.iata_code || '—';
+      const carrierNames = [...new Set(segments.map(segment => segment.operating_carrier?.name || segment.marketing_carrier?.name).filter(Boolean))];
+      const stops = segments.length <= 1 ? 'Nonstop' : `${segments.length - 1} stop${segments.length === 2 ? '' : 's'}`;
+      return `<div class="flight-leg"><div class="flight-leg-heading"><strong>${index === 0 ? 'Outbound' : 'Return'} · ${escapeHTML(formatFlightDate(first.departing_at))}</strong><span>${escapeHTML(stops)} · ${escapeHTML(formatFlightDuration(slice.duration))}</span></div><div class="flight-leg-route"><div><strong>${escapeHTML(formatFlightTime(first.departing_at))}</strong><span>${escapeHTML(from)}</span></div><i aria-hidden="true"></i><div><strong>${escapeHTML(formatFlightTime(last.arriving_at))}</strong><span>${escapeHTML(to)}</span></div></div><div class="flight-carrier">${escapeHTML(carrierNames.join(', ') || offer.owner?.name || 'Carrier details unavailable')}</div></div>`;
+    }).join('');
+    return `<article class="flight-offer-card"><div class="flight-offer-main">${legs}</div><aside class="flight-offer-price"><span>TEST FARE</span><strong>${escapeHTML(formatFlightPrice(offer.total_amount, offer.total_currency))}</strong><small>Not bookable</small><small>Test data only</small></aside></article>`;
+  }).join('');
+}
+function renderFlightSuggestions(field, places) {
+  const list = placeList(field);
+  list.innerHTML = places.length ? places.map(place => `<button class="flight-suggestion" type="button" role="option" data-flight-place="${field}" data-code="${escapeHTML(place.code)}" data-country="${escapeHTML(place.countryCode)}" data-label="${escapeHTML(place.label)}"><strong>${escapeHTML(place.label)}</strong><small>${escapeHTML(place.type === 'city' ? 'City' : 'Airport')} · ${escapeHTML(place.code)}</small></button>`).join('') : '<div class="flight-suggestion-empty">No non-African places found. Try another city or airport.</div>';
+  list.hidden = false;
+}
+async function fetchFlightPlaces(field, query, requestId) {
+  try {
+    const response = await api(`/api/flights/places?q=${encodeURIComponent(query)}`);
+    if (requestId !== flightSuggestionRequestIds[field] || placeInput(field).value.trim() !== query) return;
+    renderFlightSuggestions(field, response.places || []);
+  } catch (error) {
+    if (requestId !== flightSuggestionRequestIds[field]) return;
+    placeList(field).innerHTML = `<div class="flight-suggestion-empty">${escapeHTML(error.message || 'Could not load places.')}</div>`;
+    placeList(field).hidden = false;
+  }
+}
+function handleFlightPlaceInput(field, value) {
+  state.flight[field] = null;
+  const query = value.trim();
+  const list = placeList(field);
+  clearTimeout(flightSuggestionTimers[field]);
+  flightSuggestionRequestIds[field] += 1;
+  if (query.length < 2) { list.hidden = true; list.innerHTML = ''; return; }
+  const requestId = flightSuggestionRequestIds[field];
+  list.innerHTML = '<div class="flight-suggestion-empty">Searching worldwide places…</div>';
+  list.hidden = false;
+  flightSuggestionTimers[field] = setTimeout(() => fetchFlightPlaces(field, query, requestId), 300);
+}
+async function submitFlightSearch(event) {
+  event.preventDefault();
+  const origin = state.flight.origin;
+  const destination = state.flight.destination;
+  if (!origin || !destination) {
+    showFlightStatus('Choose both departure and destination from the non-African suggestions.', 'error');
+    return;
+  }
+  const submit = $('#flightSearchButton');
+  submit.disabled = true;
+  submit.innerHTML = 'Searching Duffel test offers…';
+  $('#flightResults').innerHTML = '';
+  showFlightStatus('Searching in Duffel test mode. Results are not bookable.');
+  const tripType = $('#flightTripType').value;
+  const requestBody = {
+    originCode: origin.code,
+    originCountryCode: origin.countryCode,
+    destinationCode: destination.code,
+    destinationCountryCode: destination.countryCode,
+    departureDate: $('#flightDeparture').value,
+    returnDate: tripType === 'round-trip' ? $('#flightReturn').value : null,
+    tripType,
+    adults: Number($('#flightAdults').value),
+    cabinClass: $('#flightCabin').value
+  };
+  try {
+    const result = await api('/api/flights/search', { method: 'POST', body: JSON.stringify(requestBody) });
+    state.flight.offers = result.offers || [];
+    renderFlightOffers(state.flight.offers);
+    showFlightStatus(`${state.flight.offers.length} test offer${state.flight.offers.length === 1 ? '' : 's'} found. These results are non-bookable and cannot be purchased here.`, 'success');
+  } catch (error) {
+    state.flight.offers = [];
+    showFlightStatus(error.message || 'Flight search failed. Please try again.', 'error');
+  } finally {
+    submit.disabled = false;
+    submit.innerHTML = 'Search test flights <span>→</span>';
+  }
+}
+
+const today = new Date();
+const departureDefault = new Date(today); departureDefault.setDate(departureDefault.getDate() + 14);
+const returnDefault = new Date(departureDefault); returnDefault.setDate(returnDefault.getDate() + 7);
+$('#flightDeparture').min = localDateValue(today);
+$('#flightDeparture').value = localDateValue(departureDefault);
+$('#flightReturn').min = localDateValue(departureDefault);
+$('#flightReturn').value = localDateValue(returnDefault);
+$('#flightOrigin').addEventListener('input', event => handleFlightPlaceInput('origin', event.currentTarget.value));
+$('#flightDestination').addEventListener('input', event => handleFlightPlaceInput('destination', event.currentTarget.value));
+$('#flightTripType').addEventListener('change', event => {
+  const roundTrip = event.currentTarget.value === 'round-trip';
+  $('#flightReturnWrap').hidden = !roundTrip;
+  $('#flightReturn').required = roundTrip;
+});
+$('#flightDeparture').addEventListener('change', event => { $('#flightReturn').min = event.currentTarget.value; });
+$('#flightSearchForm').addEventListener('submit', submitFlightSearch);
+$('#swapFlightPlaces').addEventListener('click', () => {
+  const origin = state.flight.origin;
+  const destination = state.flight.destination;
+  state.flight.origin = destination;
+  state.flight.destination = origin;
+  $('#flightOrigin').value = destination?.label || '';
+  $('#flightDestination').value = origin?.label || '';
+  placeList('origin').hidden = true;
+  placeList('destination').hidden = true;
+});
+document.addEventListener('click', event => {
+  const suggestion = event.target.closest('[data-flight-place]');
+  if (suggestion) {
+    const field = suggestion.dataset.flightPlace;
+    const place = { code: suggestion.dataset.code, countryCode: suggestion.dataset.country, label: suggestion.dataset.label };
+    state.flight[field] = place;
+    placeInput(field).value = place.label;
+    placeList(field).hidden = true;
+    placeList(field).innerHTML = '';
+    showFlightStatus('');
+    return;
+  }
+  if (!event.target.closest('.flight-autocomplete')) {
+    placeList('origin').hidden = true;
+    placeList('destination').hidden = true;
+  }
+});
+
 $('#searchInput').addEventListener('input', event => {
   state.search = event.target.value;
   if (state.view !== 'discover') navChange('discover');
@@ -386,7 +563,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape') { closeModal(); $('#notificationsPopover').hidden = true; }
 });
 document.addEventListener('click', async event => {
-  const button = event.target.closest('[data-action], [data-nav], [data-ticket-tab]');
+  const button = event.target.closest('[data-action], [data-nav], [data-ticket-tab], [data-flight-place]');
   if (!button) return;
   try {
     if (button.dataset.nav) { event.preventDefault(); navChange(button.dataset.nav); return; }

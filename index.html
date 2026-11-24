@@ -65,6 +65,7 @@
         <button class="nav-link active" data-nav="discover"><span class="nav-icon">⌂</span>Discover</button>
         <button class="nav-link" data-nav="tickets"><span class="nav-icon">▣</span>My tickets</button>
         <button class="nav-link" data-nav="favorites"><span class="nav-icon">♡</span>Favorites</button>
+        <button class="nav-link" data-nav="flights"><span class="nav-icon">✈</span>Flights</button>
       </nav>
       <label class="search-box" aria-label="Search events">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.2 4.2"/></svg>
@@ -74,7 +75,7 @@
       <div class="header-actions">
         <button class="location-button" id="locationButton" aria-label="Change location, current location Lagos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/></svg><span id="locationShort">Lagos</span><span class="chevron">⌄</span></button>
         <button class="icon-button notification-trigger" id="notificationButton" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notification-dot" id="notificationCount">3</span></button>
-        <button class="avatar-button" id="accountButton" aria-label="Open account"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80" alt="Account profile"></button>
+        <button class="avatar-button" id="accountButton" aria-label="Open account"><span class="avatar-initials" id="avatarInitials">TM</span></button>
       </div>
       <button class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
     </header>
@@ -83,6 +84,7 @@
       <button class="mobile-nav-item active" data-nav="discover"><span>⌂</span>Explore</button>
       <button class="mobile-nav-item" data-nav="tickets"><span>▣</span>Tickets</button>
       <button class="mobile-nav-item" data-nav="favorites"><span>♡</span>Saved</button>
+      <button class="mobile-nav-item" data-nav="flights"><span>✈</span>Flights</button>
       <button class="mobile-nav-item" data-nav="account"><span>◉</span>Account</button>
     </nav>
 
@@ -115,6 +117,42 @@
         <section class="trust-strip" aria-label="TicketMaster benefits"><div><span class="trust-icon">✓</span><span><strong>Every ticket verified</strong><small>Book with confidence</small></span></div><div><span class="trust-icon">↗</span><span><strong>Easy ticket transfers</strong><small>Plans change. Sharing is easy.</small></span></div><div><span class="trust-icon">♡</span><span><strong>Memories first</strong><small>We’ll handle the details</small></span></div></section>
       </section>
 
+      <section class="view" id="view-flights" aria-labelledby="flightsTitle">
+        <div class="flight-page-heading">
+          <p class="eyebrow blue">GLOBAL FLIGHT SEARCH · TEST MODE</p>
+          <h1 id="flightsTitle">Find a flight anywhere.</h1>
+          <p class="welcome-copy">Search routes around the world. African countries are excluded from flight origins and destinations.</p>
+        </div>
+        <section class="flight-search-card" aria-label="Search test flights">
+          <div class="flight-test-banner"><strong>Test search only</strong><span>Searches use Duffel test mode. No flight can be booked or paid for here.</span></div>
+          <form id="flightSearchForm" class="flight-search-form">
+            <div class="flight-route-fields">
+              <div class="flight-autocomplete">
+                <label for="flightOrigin">From</label>
+                <input id="flightOrigin" type="text" placeholder="City or airport" autocomplete="off" required aria-autocomplete="list" aria-controls="flightOriginSuggestions">
+                <div class="flight-suggestions" id="flightOriginSuggestions" role="listbox" hidden></div>
+              </div>
+              <button class="flight-swap-button" id="swapFlightPlaces" type="button" aria-label="Swap departure and destination">⇄</button>
+              <div class="flight-autocomplete">
+                <label for="flightDestination">To</label>
+                <input id="flightDestination" type="text" placeholder="City or airport" autocomplete="off" required aria-autocomplete="list" aria-controls="flightDestinationSuggestions">
+                <div class="flight-suggestions" id="flightDestinationSuggestions" role="listbox" hidden></div>
+              </div>
+            </div>
+            <div class="flight-options-row">
+              <label>Trip type<select id="flightTripType" name="tripType"><option value="round-trip">Round trip</option><option value="one-way">One way</option></select></label>
+              <label>Departure<input id="flightDeparture" name="departureDate" type="date" required></label>
+              <label id="flightReturnWrap">Return<input id="flightReturn" name="returnDate" type="date" required></label>
+              <label>Adults<select id="flightAdults" name="adults"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></label>
+              <label>Cabin<select id="flightCabin" name="cabinClass"><option value="economy">Economy</option><option value="premium_economy">Premium economy</option><option value="business">Business</option><option value="first">First</option></select></label>
+            </div>
+            <button class="primary-button flight-submit" id="flightSearchButton" type="submit">Search test flights <span>→</span></button>
+          </form>
+        </section>
+        <div id="flightSearchStatus" class="flight-search-status" role="status" aria-live="polite" hidden></div>
+        <section id="flightResults" class="flight-results" aria-live="polite" aria-label="Flight search results"></section>
+      </section>
+
       <section class="view" id="view-tickets" aria-labelledby="ticketsTitle">
         <div class="page-title-row"><div><p class="eyebrow blue">YOUR PLANS, ALL IN ONE PLACE</p><h1 id="ticketsTitle">My tickets</h1><p class="welcome-copy">Your next great night is already on the calendar.</p></div><button class="primary-button" data-nav="discover">Find an event <span>→</span></button></div>
         <div class="tab-row" role="tablist"><button class="tab-button active" data-ticket-tab="upcoming">Upcoming <span id="upcomingCount">0</span></button><button class="tab-button" data-ticket-tab="past">Past events</button><button class="tab-button" data-ticket-tab="listings">My listings</button></div>
@@ -129,7 +167,7 @@
 
       <section class="view" id="view-account" aria-labelledby="accountTitle">
         <div class="page-title-row"><div><p class="eyebrow blue">YOUR TICKETPRO</p><h1 id="accountTitle">Account</h1><p class="welcome-copy">A few details that make your nights out feel effortless.</p></div></div>
-        <div class="account-layout"><aside class="account-card"><div class="profile-large"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80" alt="Profile portrait"><span class="online-dot"></span></div><h2 id="profileName">TicketMaster member</h2><p id="profileEmail"></p><span class="member-pill">TicketMaster member</span><div class="account-menu"><button class="account-menu-link active"><span>◉</span>Profile <span>›</span></button><button class="account-menu-link" data-nav="tickets"><span>▣</span>Order history <span>›</span></button><button class="account-menu-link" data-action="payment-method"><span>▤</span>Payment methods <span>›</span></button><button class="account-menu-link" data-nav="notifications"><span>♧</span>Notifications <span>›</span></button><button class="account-menu-link" data-action="security"><span>◇</span>Security & privacy <span>›</span></button><button class="account-menu-link signout-link" data-action="logout"><span>↪</span>Sign out <span>›</span></button></div></aside><form class="profile-form" id="profileForm"><div class="form-heading"><h2>Personal details</h2><p>Keep your information up to date.</p></div><div class="form-two"><label>First name<input name="firstName" required></label><label>Last name<input name="lastName" required></label></div><label>Email address<input name="email" type="email" readonly required></label><label>Phone number<input name="phone" type="tel"></label><label>Location<select name="location"><option>Lagos, Nigeria</option><option>Abuja, Nigeria</option><option>Accra, Ghana</option></select></label><div class="form-footer"><span class="form-note" id="profileMessage"></span><button class="primary-button" type="submit">Save changes</button></div></form></div>
+        <div class="account-layout"><aside class="account-card"><div class="profile-large"><span class="profile-initials" id="profileInitials">TM</span><span class="online-dot"></span></div><h2 id="profileName">TicketMaster member</h2><p id="profileEmail"></p><span class="member-pill">TicketMaster member</span><div class="account-menu"><button class="account-menu-link active"><span>◉</span>Profile <span>›</span></button><button class="account-menu-link" data-nav="tickets"><span>▣</span>Order history <span>›</span></button><button class="account-menu-link" data-action="payment-method"><span>▤</span>Payment methods <span>›</span></button><button class="account-menu-link" data-nav="notifications"><span>♧</span>Notifications <span>›</span></button><button class="account-menu-link" data-action="security"><span>◇</span>Security & privacy <span>›</span></button><button class="account-menu-link signout-link" data-action="logout"><span>↪</span>Sign out <span>›</span></button></div></aside><form class="profile-form" id="profileForm"><div class="form-heading"><h2>Personal details</h2><p>Keep your information up to date.</p></div><div class="form-two"><label>First name<input name="firstName" required></label><label>Last name<input name="lastName" required></label></div><label>Email address<input name="email" type="email" readonly required></label><label>Phone number<input name="phone" type="tel"></label><label>Location<select name="location"><option>Lagos, Nigeria</option><option>Abuja, Nigeria</option><option>Accra, Ghana</option></select></label><div class="form-footer"><span class="form-note" id="profileMessage"></span><button class="primary-button" type="submit">Save changes</button></div></form></div>
       </section>
 
       <section class="view" id="view-notifications" aria-labelledby="notificationsTitle">
