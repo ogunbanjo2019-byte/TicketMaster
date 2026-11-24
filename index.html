@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7ff">
+  <meta name="description" content="Discover live events, choose your seats, and keep every ticket in one place with TicketMaster.">
+  <title>TicketMaster — Discover. Book. Enjoy.</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/ticketmaster-mark.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="auth-screen" id="authScreen">
+    <div class="auth-layout">
+      <section class="auth-visual" aria-label="TicketMaster welcome">
+        <a class="auth-brand" href="#signin" aria-label="TicketMaster"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4.5a2 2 0 0 1 3-1.7l5.2 3.1 5.1-3.1a2 2 0 0 1 3 1.7v4.1a4.1 4.1 0 0 1 0 8.2v10.7a2 2 0 0 1-3 1.7l-5.1-3.1-5.2 3.1a2 2 0 0 1-3-1.7V16.8a4.1 4.1 0 0 1 0-8.2V4.5Z" fill="currentColor"/><path d="m16 6.5 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L16 6.5Z" fill="#fff"/></svg></span><span class="brand-word">Ticket<span>Master</span></span></a>
+        <div class="auth-visual-copy"><span class="auth-eyebrow">DISCOVER. BOOK. ENJOY.</span><h1>Make room for<br>your next big night.</h1><p>Find your people. Find your seats. Keep every live moment in one place.</p></div>
+        <div class="auth-visual-foot"><span class="auth-spark">✦</span><span>Every great night starts somewhere.</span></div>
+      </section>
+      <section class="auth-panel" aria-labelledby="authTitle">
+        <a class="auth-mobile-brand" href="#signin" aria-label="TicketMaster"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4.5a2 2 0 0 1 3-1.7l5.2 3.1 5.1-3.1a2 2 0 0 1 3 1.7v4.1a4.1 4.1 0 0 1 0 8.2v10.7a2 2 0 0 1-3 1.7l-5.1-3.1-5.2 3.1a2 2 0 0 1-3-1.7V16.8a4.1 4.1 0 0 1 0-8.2V4.5Z" fill="currentColor"/><path d="m16 6.5 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L16 6.5Z" fill="#fff"/></svg></span><span class="brand-word">Ticket<span>Pro</span></span></a>
+        <div class="auth-panel-top"><span class="auth-kicker">YOUR NEXT LIVE MOMENT</span><span class="auth-secure"><span>✓</span> Secure account</span></div>
+        <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Sign in or create an account"><button class="auth-tab active" type="button" data-auth-mode="login" role="tab" aria-selected="true">Sign in</button><button class="auth-tab" type="button" data-auth-mode="signup" role="tab" aria-selected="false">Create account</button></div>
+        <div class="auth-heading"><h2 id="authTitle">Welcome back!</h2><p id="authSubtitle">Sign in to continue to TicketMaster.</p></div>
+        <div class="auth-message" id="authMessage" role="alert" aria-live="polite" hidden></div>
+        <form class="auth-form" id="loginForm">
+          <label>Email address<span class="auth-input-wrap"><span aria-hidden="true">✉</span><input type="email" name="email" placeholder="you@example.com" autocomplete="email" required></span></label>
+          <label>Password<span class="auth-input-wrap"><span aria-hidden="true">◇</span><input type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required minlength="8"></span></label>
+          <div class="auth-form-options"><label class="remember-option"><input id="rememberMe" type="checkbox"> <span>Remember me</span></label><button class="auth-link" type="button" data-action="forgot-password">Forgot password?</button></div>
+          <button class="auth-submit" type="submit">Sign in <span>→</span></button>
+        </form>
+        <form class="auth-form" id="signupForm" hidden>
+          <div class="auth-name-fields"><label>First name<span class="auth-input-wrap"><span aria-hidden="true">♙</span><input type="text" name="firstName" placeholder="First name" autocomplete="given-name" required></span></label><label>Last name<span class="auth-input-wrap"><span aria-hidden="true">♙</span><input type="text" name="lastName" placeholder="Last name" autocomplete="family-name" required></span></label></div>
+          <label>Email address<span class="auth-input-wrap"><span aria-hidden="true">✉</span><input type="email" name="email" placeholder="you@example.com" autocomplete="email" required></span></label>
+          <label>Phone number <span class="auth-optional">Optional</span><span class="auth-input-wrap"><span aria-hidden="true">⌕</span><input type="tel" name="phone" placeholder="Your phone number" autocomplete="tel"></span></label>
+          <label>Password<span class="auth-input-wrap"><span aria-hidden="true">◇</span><input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required></span></label>
+          <label>Confirm password<span class="auth-input-wrap"><span aria-hidden="true">◇</span><input type="password" name="confirmPassword" placeholder="Enter your password again" autocomplete="new-password" minlength="8" required></span></label>
+          <label class="remember-option auth-terms"><input type="checkbox" name="terms" required> <span>I agree to TicketMaster’s <a href="#terms" target="_blank" rel="noreferrer">Terms</a> and <a href="#privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</span></label>
+          <button class="auth-submit" type="submit">Create account <span>→</span></button>
+        </form>
+        <form class="auth-form" id="forgotForm" hidden>
+          <label>Email address<span class="auth-input-wrap"><span aria-hidden="true">✉</span><input type="email" name="email" placeholder="you@example.com" autocomplete="email" required></span></label>
+          <button class="auth-submit" type="submit">Send reset link <span>→</span></button>
+          <button class="auth-back-link" type="button" data-auth-mode="login">← Back to sign in</button>
+        </form>
+        <form class="auth-form" id="resetForm" hidden>
+          <label>New password<span class="auth-input-wrap"><span aria-hidden="true">◇</span><input type="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required></span></label>
+          <label>Confirm new password<span class="auth-input-wrap"><span aria-hidden="true">◇</span><input type="password" name="confirmPassword" placeholder="Enter your new password again" autocomplete="new-password" minlength="8" required></span></label>
+          <button class="auth-submit" type="submit">Update password <span>→</span></button>
+        </form>
+        <p class="auth-switch-copy" id="authSwitchCopy">New to TicketMaster? <button class="auth-link" type="button" data-auth-mode="signup">Create an account</button></p>
+        <p class="auth-fine-print">By continuing, you agree to receive important ticket and event updates.</p>
+      </section>
+    </div>
+  </main>
+
+  <div class="app-shell" hidden>
+    <header class="topbar">
+      <a class="brand" href="#discover" data-nav="discover" aria-label="TicketMaster home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4.5a2 2 0 0 1 3-1.7l5.2 3.1 5.1-3.1a2 2 0 0 1 3 1.7v4.1a4.1 4.1 0 0 1 0 8.2v10.7a2 2 0 0 1-3 1.7l-5.1-3.1-5.2 3.1a2 2 0 0 1-3-1.7V16.8a4.1 4.1 0 0 1 0-8.2V4.5Z" fill="currentColor"/><path d="m16 6.5 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L16 6.5Z" fill="#fff"/></svg></span>
+        <span class="brand-word">Ticket<span>Pro</span></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-nav="discover"><span class="nav-icon">⌂</span>Discover</button>
+        <button class="nav-link" data-nav="tickets"><span class="nav-icon">▣</span>My tickets</button>
+        <button class="nav-link" data-nav="favorites"><span class="nav-icon">♡</span>Favorites</button>
+      </nav>
+      <label class="search-box" aria-label="Search events">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.2 4.2"/></svg>
+        <input id="searchInput" type="search" placeholder="Search events, artists and more..." autocomplete="off">
+        <kbd>⌘ K</kbd>
+      </label>
+      <div class="header-actions">
+        <button class="location-button" id="locationButton" aria-label="Change location, current location Lagos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/></svg><span id="locationShort">Lagos</span><span class="chevron">⌄</span></button>
+        <button class="icon-button notification-trigger" id="notificationButton" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notification-dot" id="notificationCount">3</span></button>
+        <button class="avatar-button" id="accountButton" aria-label="Open account"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80" alt="Account profile"></button>
+      </div>
+      <button class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    </header>
+
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+      <button class="mobile-nav-item active" data-nav="discover"><span>⌂</span>Explore</button>
+      <button class="mobile-nav-item" data-nav="tickets"><span>▣</span>Tickets</button>
+      <button class="mobile-nav-item" data-nav="favorites"><span>♡</span>Saved</button>
+      <button class="mobile-nav-item" data-nav="account"><span>◉</span>Account</button>
+    </nav>
+
+    <main class="main-content">
+      <section class="view active" id="view-discover" aria-labelledby="discoverTitle">
+        <div class="welcome-row">
+          <div><p class="eyebrow">MONDAY, NOVEMBER 23, 2026 <span class="eyebrow-line"></span> <span id="currentLocation">LAGOS</span></p><h1 id="discoverTitle">Find your <em>next</em> live moment.</h1><p class="welcome-copy">Big nights, brilliant seats, and memories waiting to happen.</p></div>
+          <button class="outline-button location-large" id="locationButtonLarge"><span>⌖</span> <span id="locationLong">Lagos</span> <span class="chevron">⌄</span></button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="discover-main">
+            <div id="featureEvent"></div>
+            <div class="section-heading section-heading-spaced"><div><p class="eyebrow blue">CURATED FOR YOU</p><h2>What’s happening</h2></div><button class="text-button" data-action="show-all">View all events <span>→</span></button></div>
+            <div class="category-strip" id="categoryStrip" aria-label="Filter events by category">
+              <button class="category-chip selected" data-category="All">All events</button>
+              <button class="category-chip" data-category="Music">Music</button>
+              <button class="category-chip" data-category="Comedy">Comedy</button>
+              <button class="category-chip" data-category="Festival">Festivals</button>
+              <button class="category-chip" data-category="Arts">Arts & culture</button>
+            </div>
+            <div class="event-grid" id="eventGrid"></div>
+          </div>
+          <aside class="ticket-rail" aria-label="Upcoming tickets">
+            <div class="rail-heading"><div><p class="eyebrow blue">READY WHEN YOU ARE</p><h2>Your tickets <span class="count-pill" id="ticketCount">0</span></h2></div><button class="icon-button small" data-nav="tickets" aria-label="View all tickets">→</button></div>
+            <div id="miniTickets" class="mini-ticket-list"></div>
+            <button class="rail-link" data-nav="tickets">Go to ticket wallet <span>→</span></button>
+            <div class="rail-promo"><div class="promo-icon">✦</div><p class="eyebrow">GOOD THINGS ARE BETTER SHARED</p><h3>Bring your people.</h3><p>Send tickets in a few taps, right from your wallet.</p><button class="text-button" data-nav="tickets">Explore transfers <span>→</span></button></div>
+          </aside>
+        </div>
+        <section class="trust-strip" aria-label="TicketMaster benefits"><div><span class="trust-icon">✓</span><span><strong>Every ticket verified</strong><small>Book with confidence</small></span></div><div><span class="trust-icon">↗</span><span><strong>Easy ticket transfers</strong><small>Plans change. Sharing is easy.</small></span></div><div><span class="trust-icon">♡</span><span><strong>Memories first</strong><small>We’ll handle the details</small></span></div></section>
+      </section>
+
+      <section class="view" id="view-tickets" aria-labelledby="ticketsTitle">
+        <div class="page-title-row"><div><p class="eyebrow blue">YOUR PLANS, ALL IN ONE PLACE</p><h1 id="ticketsTitle">My tickets</h1><p class="welcome-copy">Your next great night is already on the calendar.</p></div><button class="primary-button" data-nav="discover">Find an event <span>→</span></button></div>
+        <div class="tab-row" role="tablist"><button class="tab-button active" data-ticket-tab="upcoming">Upcoming <span id="upcomingCount">0</span></button><button class="tab-button" data-ticket-tab="past">Past events</button><button class="tab-button" data-ticket-tab="listings">My listings</button></div>
+        <div id="ticketPageList" class="ticket-card-grid"></div>
+      </section>
+
+      <section class="view" id="view-favorites" aria-labelledby="favoritesTitle">
+        <div class="page-title-row"><div><p class="eyebrow blue">ALL YOUR “ONE DAY” PLANS</p><h1 id="favoritesTitle">Saved events</h1><p class="welcome-copy">Keep the ones you love close.</p></div><button class="primary-button" data-nav="discover">Explore events <span>→</span></button></div>
+        <div class="event-grid favorites-grid" id="favoritesGrid"></div>
+        <div class="empty-state" id="favoritesEmpty" hidden><div class="empty-symbol">♡</div><h2>A little room for something memorable.</h2><p>Tap the heart on any event and we’ll save it here.</p><button class="primary-button" data-nav="discover">Explore events</button></div>
+      </section>
+
+      <section class="view" id="view-account" aria-labelledby="accountTitle">
+        <div class="page-title-row"><div><p class="eyebrow blue">YOUR TICKETPRO</p><h1 id="accountTitle">Account</h1><p class="welcome-copy">A few details that make your nights out feel effortless.</p></div></div>
+        <div class="account-layout"><aside class="account-card"><div class="profile-large"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80" alt="Profile portrait"><span class="online-dot"></span></div><h2 id="profileName">TicketMaster member</h2><p id="profileEmail"></p><span class="member-pill">TicketMaster member</span><div class="account-menu"><button class="account-menu-link active"><span>◉</span>Profile <span>›</span></button><button class="account-menu-link" data-nav="tickets"><span>▣</span>Order history <span>›</span></button><button class="account-menu-link" data-action="payment-method"><span>▤</span>Payment methods <span>›</span></button><button class="account-menu-link" data-nav="notifications"><span>♧</span>Notifications <span>›</span></button><button class="account-menu-link" data-action="security"><span>◇</span>Security & privacy <span>›</span></button><button class="account-menu-link signout-link" data-action="logout"><span>↪</span>Sign out <span>›</span></button></div></aside><form class="profile-form" id="profileForm"><div class="form-heading"><h2>Personal details</h2><p>Keep your information up to date.</p></div><div class="form-two"><label>First name<input name="firstName" required></label><label>Last name<input name="lastName" required></label></div><label>Email address<input name="email" type="email" readonly required></label><label>Phone number<input name="phone" type="tel"></label><label>Location<select name="location"><option>Lagos, Nigeria</option><option>Abuja, Nigeria</option><option>Accra, Ghana</option></select></label><div class="form-footer"><span class="form-note" id="profileMessage"></span><button class="primary-button" type="submit">Save changes</button></div></form></div>
+      </section>
+
+      <section class="view" id="view-notifications" aria-labelledby="notificationsTitle">
+        <div class="page-title-row"><div><p class="eyebrow blue">THE IMPORTANT LITTLE THINGS</p><h1 id="notificationsTitle">Notifications</h1><p class="welcome-copy">Updates on tickets, transfers, and the events you love.</p></div><button class="text-button" data-action="mark-read">Mark all as read</button></div>
+        <div class="notification-page-list" id="notificationPageList"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><a class="brand brand-small" href="#discover" data-nav="discover"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4.5a2 2 0 0 1 3-1.7l5.2 3.1 5.1-3.1a2 2 0 0 1 3 1.7v4.1a4.1 4.1 0 0 1 0 8.2v10.7a2 2 0 0 1-3 1.7l-5.1-3.1-5.2 3.1a2 2 0 0 1-3-1.7V16.8a4.1 4.1 0 0 1 0-8.2V4.5Z" fill="currentColor"/><path d="m16 6.5 1.5 3.1 3.4.5-2.5 2.4.6 3.4-3-1.6-3 1.6.6-3.4-2.5-2.4 3.4-.5L16 6.5Z" fill="#fff"/></svg></span><span class="brand-word">Ticket<span>Pro</span></span></a><span>Discover. Book. Enjoy.</span><span>© 2026 TicketMaster</span></footer>
+  </div>
+
+  <div class="notifications-popover" id="notificationsPopover" hidden><div class="popover-heading"><div><p class="eyebrow blue">YOUR UPDATES</p><h2>Notifications</h2></div><button class="icon-button small" data-action="close-notifications" aria-label="Close notifications">×</button></div><div id="notificationList"></div><button class="rail-link" data-nav="notifications">See all notifications <span>→</span></button></div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal-card" id="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-action="close-modal" aria-label="Close dialog">×</button><div id="modalBody"></div></section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
