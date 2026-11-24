@@ -1,6 +1,6 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const API_BASE_URL = 'https://your-backend-service.onrender.com';
+const API_BASE_URL = 'https://ticketmaster-backend-8icp.onrender.com';
 const apiURL = path => `${API_BASE_URL}${path}`;
 const state = {
   events: [], favorites: [], orders: [], notifications: [], listings: [], profile: null,
