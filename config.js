@@ -1,1 +1,1 @@
-window.TICKETPRO_API_BASE_URL = 'https://your-backend.onrender.com';
+window.TICKETPRO_API_BASE_URL = 'https://ticketmaster-backend-8icp.onrender.com';
