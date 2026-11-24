@@ -65,3 +65,29 @@
 /* Keep the global flight-search landing page free of event-only location/search controls. */
 body.flights-view .search-box,
 body.flights-view #locationButton{display:none!important}
+.hold-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:14px;border-radius:11px;background:#eef5ff;border:1px solid #c9ddff;color:#113f9e;font-size:11px;font-weight:700}
+.hold-clock-time{font:800 13px ui-monospace,SFMono-Regular,monospace;color:#075cf5}
+.tm-wallet-shell{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #e5ebf4;box-shadow:var(--shadow);max-width:560px;margin:0 auto}
+.tm-wallet-header{background:#026cdf;color:#fff;padding:18px 20px 0}
+.tm-wallet-toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.tm-wallet-brand{font:800 22px/1 Manrope,sans-serif;letter-spacing:-.6px;font-style:italic}
+.tm-wallet-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tm-wallet-btn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:700}
+.tm-wallet-btn:hover{background:rgba(255,255,255,.26)}
+.tm-wallet-badge{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:11px;font-weight:800}
+.tm-wallet-title{margin:0 0 12px;font:800 24px/1.15 Manrope,sans-serif}
+.tm-wallet-tabs{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;font-size:12px;font-weight:700}
+.tm-wallet-tab{padding:11px 6px;border:0;background:transparent;color:rgba(255,255,255,.78);border-bottom:3px solid transparent}
+.tm-wallet-tab.active{color:#fff;border-bottom-color:#fff}
+.tm-ticket-row{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px;border-bottom:1px solid #edf0f6;cursor:pointer}
+.tm-ticket-row:hover{background:#f9fbff}
+.tm-ticket-thumb{width:76px;height:92px;border-radius:10px;object-fit:cover;background:#e8eef9}
+.tm-ticket-title{margin:0 0 4px;font:800 15px/1.25 Manrope,sans-serif;color:var(--ink)}
+.tm-ticket-meta{font-size:12px;color:#3d475c;line-height:1.4}
+.tm-ticket-seats{margin-top:6px;font-size:12px;font-weight:700;color:#111a35}
+.tm-ticket-subseats{font-size:11px;color:#3d475c;margin-top:2px}
+.tm-ticket-row-right{display:flex;align-items:center;gap:8px}
+.tm-inline-edit{border:1px solid #d7e3f7;background:#f3f7ff;color:#075cf5;border-radius:7px;padding:4px 8px;font-size:10px;font-weight:800}
+.tm-chevron{color:#075cf5;font-size:20px;font-weight:700;line-height:1}
+.tm-notice-banner{margin:16px;padding:12px 14px;border-radius:10px;background:#f7e49c;color:#2b2408;display:flex;gap:10px;align-items:flex-start;font-size:11px;line-height:1.45}
+.tm-notice-icon{font-size:16px;line-height:1.2}
