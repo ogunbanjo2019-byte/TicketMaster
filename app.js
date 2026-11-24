@@ -1,14 +1,13 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const API_BASE_URL = 'https://ticketmaster-backend-8icp.onrender.com';
+const API_BASE_URL = String(window.TICKETPRO_API_BASE_URL || '').replace(/\/+$/, '');
 const apiURL = path => `${API_BASE_URL}${path}`;
 const state = {
   events: [], favorites: [], orders: [], notifications: [], listings: [], profile: null,
-  view: 'flights', ticketTab: 'upcoming', category: 'All', search: '', location: 'Lagos',
+  view: 'discover', bottomTab: 'home', ticketTab: 'upcoming', category: 'All', search: '', location: 'All U.S. events',
   selectedEvent: null, selectedType: null, selectedSeats: [], quantity: 1, currentOrder: null,
   submitting: false, toastTimer: null, authToken: '', authRefreshToken: '', authUser: null,
-  recoveryTokens: null, reservedSeats: [],
-  flight: { origin: null, destination: null, offers: [] }
+  recoveryTokens: null, reservedSeats: []
 };
 const money = value => `$${Number(value || 0).toFixed(2)}`;
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -81,7 +80,7 @@ async function showDashboard(user) {
   state.authUser = user;
   $('#authScreen').hidden = true;
   $('.app-shell').hidden = false;
-  navChange('flights');
+  navChange('discover');
   try { await refreshData(); }
   catch (error) {
     if (error.status === 401) {
@@ -157,11 +156,13 @@ async function signOut() {
 function findEvent(id) { return state.events.find(event => event.id === id); }
 function orderEvent(order) { return findEvent(order.eventId) || state.events.find(event => event.shortTitle === order.title) || state.events[0]; }
 function navChange(view) {
-  const allowed = ['discover', 'tickets', 'favorites', 'account', 'notifications', 'flights'];
+  const allowed = ['discover', 'tickets', 'favorites', 'account', 'notifications'];
   state.view = allowed.includes(view) ? view : 'discover';
+  if (!$('#modalBackdrop').hidden) closeModal();
   $$('.view').forEach(section => section.classList.toggle('active', section.id === `view-${state.view}`));
   $$('[data-nav]').forEach(button => button.classList.toggle('active', button.dataset.nav === state.view));
-  document.body.classList.toggle('flights-view', state.view === 'flights');
+  state.bottomTab = state.view === 'discover' ? 'home' : ['tickets', 'favorites'].includes(state.view) ? state.view : 'more';
+  $$('[data-bottom-tab]').forEach(button => button.classList.toggle('active', button.dataset.bottomTab === state.bottomTab));
   $('#notificationsPopover').hidden = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (state.view === 'tickets') renderTickets();
@@ -182,12 +183,14 @@ function cardForEvent(event) {
     </div></article>`;
 }
 function renderDiscover() {
-  const locationShort = state.location === 'All locations' ? 'All' : state.location.split(',')[0];
+  const locationShort = state.location === 'All U.S. events' ? 'All U.S.' : state.location.split(',')[0];
   $('#locationShort').textContent = locationShort;
   $('#locationLong').textContent = state.location;
   $('#locationButton').setAttribute('aria-label', `Change location, current location ${state.location}`);
   $('#currentLocation').textContent = state.location.toUpperCase();
-  const cityEvents = state.location === 'All locations' ? state.events : state.events.filter(event => event.city.toLowerCase() === state.location.split(',')[0].toLowerCase());
+  const cityAliases = { 'Los Angeles': ['Los Angeles', 'Inglewood'], 'New York City': ['New York City', 'New York'] };
+  const selectedCities = cityAliases[state.location.split(',')[0]] || [state.location.split(',')[0]];
+  const cityEvents = state.location === 'All U.S. events' ? state.events : state.events.filter(event => selectedCities.some(city => event.city.toLowerCase() === city.toLowerCase()));
   const feature = cityEvents[0];
   if (feature) {
     const soldOut = feature.ticketTypes.length === 0;
@@ -247,8 +250,8 @@ function showModal(markup) {
 }
 function closeModal() { $('#modalBackdrop').hidden = true; document.body.style.overflow = ''; }
 function showLocationPicker() {
-  const locations = ['Lagos', 'Abuja', 'Accra', 'All locations'];
-  showModal(`<div class="flow-modal location-picker"><div class="flow-heading"><button class="back-button" data-action="close-modal" aria-label="Close location picker">←</button><div><h2 id="modalTitle">Choose a location</h2><p>See live events in the city you have in mind.</p></div></div><div class="location-options">${locations.map(city => `<button class="location-option ${state.location === city ? 'selected' : ''}" data-action="select-location" data-city="${escapeHTML(city)}"><span class="location-pin">⌖</span><span><strong>${escapeHTML(city)}</strong><small>${city === 'All locations' ? 'Browse every city' : `Events around ${escapeHTML(city)}`}</small></span><span class="location-check">${state.location === city ? '✓' : '›'}</span></button>`).join('')}</div></div>`);
+  const locations = ['New York City, NY', 'Los Angeles, CA', 'Las Vegas, NV', 'Chicago, IL', 'Atlanta, GA', 'Nashville, TN', 'Denver, CO', 'Miami, FL', 'Minneapolis, MN', 'All U.S. events'];
+  showModal(`<div class="flow-modal location-picker"><div class="flow-heading"><button class="back-button" data-action="close-modal" aria-label="Close location picker">←</button><div><h2 id="modalTitle">Choose a location</h2><p>See live events in the city you have in mind.</p></div></div><div class="location-options">${locations.map(city => `<button class="location-option ${state.location === city ? 'selected' : ''}" data-action="select-location" data-city="${escapeHTML(city)}"><span class="location-pin">⌖</span><span><strong>${escapeHTML(city)}</strong><small>${city === 'All U.S. events' ? 'Browse live events nationwide' : `Events around ${escapeHTML(city)}`}</small></span><span class="location-check">${state.location === city ? '✓' : '›'}</span></button>`).join('')}</div></div>`);
 }
 function showEventDetail(event) {
   if (!event) return;
@@ -258,7 +261,8 @@ function showEventDetail(event) {
   state.selectedSeats = [];
   state.quantity = 1;
   const soldOut = event.ticketTypes.length === 0;
-  showModal(`<div class="detail-hero" style="background-image:url('${escapeHTML(event.hero)}')"><div class="detail-hero-copy"><p class="eyebrow">${escapeHTML(event.category)} · ${escapeHTML(event.city)}</p><h2 id="modalTitle">${escapeHTML(event.title)}</h2><p>${escapeHTML(event.tagline)}</p></div></div><div class="detail-body"><div class="detail-columns"><div><h3>Make a night of it</h3><p class="detail-description">${escapeHTML(event.description)}</p><div class="event-facts"><span>▣ ${escapeHTML(event.date)}</span><span>⌖ ${escapeHTML(event.venue)}, ${escapeHTML(event.city)}</span><span>✓ Verified tickets</span></div></div><aside class="detail-buy-panel"><span class="price-start">Tickets from</span><strong>${money(Math.min(...event.ticketTypes.map(type => type.price)))}</strong><small>${soldOut ? 'This event is currently sold out.' : 'Fees shown before you place your order.'}</small><button class="primary-button" data-action="choose-seats" ${soldOut ? 'disabled' : ''}>${soldOut ? 'Sold out' : 'Choose tickets →'}</button></aside></div></div>`);
+  const ticketmasterUrl = event.ticketmasterUrl || `https://www.ticketmaster.com/search?q=${encodeURIComponent(event.title)}`;
+  showModal(`<div class="detail-hero" style="background-image:url('${escapeHTML(event.hero)}')"><div class="detail-hero-copy"><p class="eyebrow">${escapeHTML(event.category)} · ${escapeHTML(event.city)}</p><h2 id="modalTitle">${escapeHTML(event.title)}</h2><p>${escapeHTML(event.tagline)}</p></div></div><div class="detail-body"><div class="detail-columns"><div><h3>Make a night of it</h3><p class="detail-description">${escapeHTML(event.description)}</p><div class="event-facts"><span>▣ ${escapeHTML(event.date)}</span><span>⌖ ${escapeHTML(event.venue)}, ${escapeHTML(event.city)}</span><span>✓ Official Ticketmaster search</span></div></div><aside class="detail-buy-panel"><span class="price-start">Tickets from</span><strong>${money(Math.min(...event.ticketTypes.map(type => type.price)))}</strong><small>${soldOut ? 'This event is currently sold out.' : 'Availability and final prices are shown on Ticketmaster.'}</small><a class="primary-button" href="${escapeHTML(ticketmasterUrl)}" target="_blank" rel="noopener noreferrer">Check Ticketmaster for tickets <span>↗</span></a></aside></div></div>`);
 }
 function sectionForType(typeId) { return typeId === 'premium' ? 'A' : typeId === 'resale' ? 'R' : 'B'; }
 function seatsMarkup(event) {
@@ -368,175 +372,6 @@ async function markAllRead() {
   notify('All notifications marked as read.');
 }
 
-const flightSuggestionTimers = { origin: null, destination: null };
-const flightSuggestionRequestIds = { origin: 0, destination: 0 };
-
-function placeInput(field) { return $(`#flight${field === 'origin' ? 'Origin' : 'Destination'}`); }
-function placeList(field) { return $(`#flight${field === 'origin' ? 'Origin' : 'Destination'}Suggestions`); }
-function localDateValue(date) {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-}
-function showFlightStatus(message, kind = '') {
-  const element = $('#flightSearchStatus');
-  element.textContent = message;
-  element.className = `flight-search-status${kind ? ` ${kind}` : ''}`;
-  element.hidden = !message;
-}
-function formatFlightTime(value) {
-  const text = String(value || '');
-  const match = text.match(/T(\d{2}:\d{2})/);
-  return match ? match[1] : '—';
-}
-function formatFlightDate(value) {
-  if (!value) return 'Date not supplied';
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.valueOf()) ? String(value).slice(0, 10) : parsed.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-}
-function formatFlightDuration(value) {
-  const match = String(value || '').match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/);
-  if (!match) return value || 'Duration unavailable';
-  const hours = Number(match[1] || 0);
-  const minutes = Number(match[2] || 0);
-  return [hours ? `${hours}h` : '', minutes ? `${minutes}m` : ''].filter(Boolean).join(' ') || 'Under 1m';
-}
-function formatFlightPrice(amount, currency) {
-  try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(Number(amount));
-  } catch {
-    return `${currency || ''} ${amount || ''}`.trim();
-  }
-}
-function renderFlightOffers(offers) {
-  const container = $('#flightResults');
-  if (!offers.length) {
-    container.innerHTML = '<div class="flight-empty-state"><strong>No test offers were returned.</strong><span>Try another route or later dates. Test-mode availability can differ from live airline inventory.</span></div>';
-    return;
-  }
-  container.innerHTML = offers.map(offer => {
-    const legs = (offer.slices || []).map((slice, index) => {
-      const segments = slice.segments || [];
-      const first = segments[0] || {};
-      const last = segments[segments.length - 1] || {};
-      const from = first.origin?.iata_code || '—';
-      const to = last.destination?.iata_code || '—';
-      const carrierNames = [...new Set(segments.map(segment => segment.operating_carrier?.name || segment.marketing_carrier?.name).filter(Boolean))];
-      const stops = segments.length <= 1 ? 'Nonstop' : `${segments.length - 1} stop${segments.length === 2 ? '' : 's'}`;
-      return `<div class="flight-leg"><div class="flight-leg-heading"><strong>${index === 0 ? 'Outbound' : 'Return'} · ${escapeHTML(formatFlightDate(first.departing_at))}</strong><span>${escapeHTML(stops)} · ${escapeHTML(formatFlightDuration(slice.duration))}</span></div><div class="flight-leg-route"><div><strong>${escapeHTML(formatFlightTime(first.departing_at))}</strong><span>${escapeHTML(from)}</span></div><i aria-hidden="true"></i><div><strong>${escapeHTML(formatFlightTime(last.arriving_at))}</strong><span>${escapeHTML(to)}</span></div></div><div class="flight-carrier">${escapeHTML(carrierNames.join(', ') || offer.owner?.name || 'Carrier details unavailable')}</div></div>`;
-    }).join('');
-    return `<article class="flight-offer-card"><div class="flight-offer-main">${legs}</div><aside class="flight-offer-price"><span>TEST FARE</span><strong>${escapeHTML(formatFlightPrice(offer.total_amount, offer.total_currency))}</strong><small>Not bookable</small><small>Test data only</small></aside></article>`;
-  }).join('');
-}
-function renderFlightSuggestions(field, places) {
-  const list = placeList(field);
-  list.innerHTML = places.length ? places.map(place => `<button class="flight-suggestion" type="button" role="option" data-flight-place="${field}" data-code="${escapeHTML(place.code)}" data-country="${escapeHTML(place.countryCode)}" data-label="${escapeHTML(place.label)}"><strong>${escapeHTML(place.label)}</strong><small>${escapeHTML(place.type === 'city' ? 'City' : 'Airport')} · ${escapeHTML(place.code)}</small></button>`).join('') : '<div class="flight-suggestion-empty">No non-African places found. Try another city or airport.</div>';
-  list.hidden = false;
-}
-async function fetchFlightPlaces(field, query, requestId) {
-  try {
-    const response = await api(`/api/flights/places?q=${encodeURIComponent(query)}`);
-    if (requestId !== flightSuggestionRequestIds[field] || placeInput(field).value.trim() !== query) return;
-    renderFlightSuggestions(field, response.places || []);
-  } catch (error) {
-    if (requestId !== flightSuggestionRequestIds[field]) return;
-    placeList(field).innerHTML = `<div class="flight-suggestion-empty">${escapeHTML(error.message || 'Could not load places.')}</div>`;
-    placeList(field).hidden = false;
-  }
-}
-function handleFlightPlaceInput(field, value) {
-  state.flight[field] = null;
-  const query = value.trim();
-  const list = placeList(field);
-  clearTimeout(flightSuggestionTimers[field]);
-  flightSuggestionRequestIds[field] += 1;
-  if (query.length < 2) { list.hidden = true; list.innerHTML = ''; return; }
-  const requestId = flightSuggestionRequestIds[field];
-  list.innerHTML = '<div class="flight-suggestion-empty">Searching worldwide places…</div>';
-  list.hidden = false;
-  flightSuggestionTimers[field] = setTimeout(() => fetchFlightPlaces(field, query, requestId), 300);
-}
-async function submitFlightSearch(event) {
-  event.preventDefault();
-  const origin = state.flight.origin;
-  const destination = state.flight.destination;
-  if (!origin || !destination) {
-    showFlightStatus('Choose both departure and destination from the non-African suggestions.', 'error');
-    return;
-  }
-  const submit = $('#flightSearchButton');
-  submit.disabled = true;
-  submit.innerHTML = 'Searching Duffel test offers…';
-  $('#flightResults').innerHTML = '';
-  showFlightStatus('Searching in Duffel test mode. Results are not bookable.');
-  const tripType = $('#flightTripType').value;
-  const requestBody = {
-    originCode: origin.code,
-    originCountryCode: origin.countryCode,
-    destinationCode: destination.code,
-    destinationCountryCode: destination.countryCode,
-    departureDate: $('#flightDeparture').value,
-    returnDate: tripType === 'round-trip' ? $('#flightReturn').value : null,
-    tripType,
-    adults: Number($('#flightAdults').value),
-    cabinClass: $('#flightCabin').value
-  };
-  try {
-    const result = await api('/api/flights/search', { method: 'POST', body: JSON.stringify(requestBody) });
-    state.flight.offers = result.offers || [];
-    renderFlightOffers(state.flight.offers);
-    showFlightStatus(`${state.flight.offers.length} test offer${state.flight.offers.length === 1 ? '' : 's'} found. These results are non-bookable and cannot be purchased here.`, 'success');
-  } catch (error) {
-    state.flight.offers = [];
-    showFlightStatus(error.message || 'Flight search failed. Please try again.', 'error');
-  } finally {
-    submit.disabled = false;
-    submit.innerHTML = 'Search test flights <span>→</span>';
-  }
-}
-
-const today = new Date();
-const departureDefault = new Date(today); departureDefault.setDate(departureDefault.getDate() + 14);
-const returnDefault = new Date(departureDefault); returnDefault.setDate(returnDefault.getDate() + 7);
-$('#flightDeparture').min = localDateValue(today);
-$('#flightDeparture').value = localDateValue(departureDefault);
-$('#flightReturn').min = localDateValue(departureDefault);
-$('#flightReturn').value = localDateValue(returnDefault);
-$('#flightOrigin').addEventListener('input', event => handleFlightPlaceInput('origin', event.currentTarget.value));
-$('#flightDestination').addEventListener('input', event => handleFlightPlaceInput('destination', event.currentTarget.value));
-$('#flightTripType').addEventListener('change', event => {
-  const roundTrip = event.currentTarget.value === 'round-trip';
-  $('#flightReturnWrap').hidden = !roundTrip;
-  $('#flightReturn').required = roundTrip;
-});
-$('#flightDeparture').addEventListener('change', event => { $('#flightReturn').min = event.currentTarget.value; });
-$('#flightSearchForm').addEventListener('submit', submitFlightSearch);
-$('#swapFlightPlaces').addEventListener('click', () => {
-  const origin = state.flight.origin;
-  const destination = state.flight.destination;
-  state.flight.origin = destination;
-  state.flight.destination = origin;
-  $('#flightOrigin').value = destination?.label || '';
-  $('#flightDestination').value = origin?.label || '';
-  placeList('origin').hidden = true;
-  placeList('destination').hidden = true;
-});
-document.addEventListener('click', event => {
-  const suggestion = event.target.closest('[data-flight-place]');
-  if (suggestion) {
-    const field = suggestion.dataset.flightPlace;
-    const place = { code: suggestion.dataset.code, countryCode: suggestion.dataset.country, label: suggestion.dataset.label };
-    state.flight[field] = place;
-    placeInput(field).value = place.label;
-    placeList(field).hidden = true;
-    placeList(field).innerHTML = '';
-    showFlightStatus('');
-    return;
-  }
-  if (!event.target.closest('.flight-autocomplete')) {
-    placeList('origin').hidden = true;
-    placeList('destination').hidden = true;
-  }
-});
-
 $('#searchInput').addEventListener('input', event => {
   state.search = event.target.value;
   if (state.view !== 'discover') navChange('discover');
@@ -565,7 +400,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape') { closeModal(); $('#notificationsPopover').hidden = true; }
 });
 document.addEventListener('click', async event => {
-  const button = event.target.closest('[data-action], [data-nav], [data-ticket-tab], [data-flight-place]');
+  const button = event.target.closest('[data-action], [data-nav], [data-ticket-tab]');
   if (!button) return;
   try {
     if (button.dataset.nav) { event.preventDefault(); navChange(button.dataset.nav); return; }
@@ -578,6 +413,17 @@ document.addEventListener('click', async event => {
     const id = button.dataset.id;
     switch (button.dataset.action) {
       case 'event-detail': if (!button.closest('.favorite-toggle')) showEventDetail(findEvent(id)); break;
+      case 'explore':
+        navChange('discover');
+        state.bottomTab = 'explore';
+        $$('[data-bottom-tab]').forEach(tab => tab.classList.toggle('active', tab.dataset.bottomTab === state.bottomTab));
+        requestAnimationFrame(() => { $('#categoryStrip').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('#searchInput').focus({ preventScroll: true }); });
+        break;
+      case 'more-menu':
+        state.bottomTab = 'more';
+        $$('[data-bottom-tab]').forEach(tab => tab.classList.toggle('active', tab.dataset.bottomTab === state.bottomTab));
+        showModal(`<div class="flow-modal"><div class="flow-heading"><div><h2 id="modalTitle">More</h2><p>Account and event updates.</p></div><button class="icon-button small" data-action="close-modal" aria-label="Close menu">×</button></div><div class="location-options"><button class="location-option" data-nav="account"><span class="location-pin">◉</span><span><strong>Account</strong><small>Profile and settings</small></span><span class="location-check">›</span></button><button class="location-option" data-nav="notifications"><span class="location-pin">♧</span><span><strong>Notifications</strong><small>Ticket and event updates</small></span><span class="location-check">›</span></button><a class="location-option" href="https://www.ticketmaster.com/" target="_blank" rel="noopener noreferrer"><span class="location-pin">↗</span><span><strong>Ticketmaster.com</strong><small>Official event listings and checkout</small></span><span class="location-check">›</span></a></div></div>`);
+        break;
       case 'buy-event': event.stopPropagation(); if (!button.disabled) showEventDetail(findEvent(id)); break;
       case 'favorite': event.stopPropagation(); await setFavorite(id); break;
       case 'show-all':
@@ -588,7 +434,7 @@ document.addEventListener('click', async event => {
       case 'select-location':
         state.location = button.dataset.city;
         closeModal(); renderDiscover();
-        notify(state.location === 'All locations' ? 'Showing events in every city.' : `Showing events in ${state.location}.`);
+        notify(state.location === 'All U.S. events' ? 'Showing live events across the United States.' : `Showing events in ${state.location}.`);
         break;
       case 'choose-seats': showSeatSelection(); break;
       case 'back-to-detail': showEventDetail(state.selectedEvent); break;

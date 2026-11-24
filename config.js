@@ -1,0 +1,1 @@
+window.TICKETPRO_API_BASE_URL = 'https://your-backend.onrender.com';
