@@ -501,15 +501,16 @@ $('#loginForm').addEventListener('submit', async event => {
 
 $('#signupForm').addEventListener('submit', async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   setAuthMessage('');
-  const data = Object.fromEntries(new FormData(event.currentTarget));
+  const data = Object.fromEntries(new FormData(form));
   if (data.password !== data.confirmPassword) { setAuthMessage('Those passwords do not match.'); return; }
-  const submit = $('button[type="submit"]', event.currentTarget);
+  const submit = $('button[type="submit"]', form);
   submit.disabled = true;
   try {
     const result = await api('/api/auth/signup', { method: 'POST', body: JSON.stringify({ firstName: data.firstName, lastName: data.lastName, email: data.email, phone: data.phone, password: data.password }) });
     if (result.requiresEmailVerification) {
-      event.currentTarget.reset();
+      form.reset();
       setAuthMode('login');
       setAuthMessage(result.message, 'success');
       return;
@@ -522,13 +523,14 @@ $('#signupForm').addEventListener('submit', async event => {
 
 $('#forgotForm').addEventListener('submit', async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   setAuthMessage('');
-  const submit = $('button[type="submit"]', event.currentTarget);
+  const submit = $('button[type="submit"]', form);
   submit.disabled = true;
   try {
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const data = Object.fromEntries(new FormData(form));
     const result = await api('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) });
-    event.currentTarget.reset();
+    form.reset();
     setAuthMessage(result.message, 'success');
   } catch (error) { setAuthMessage(error.message); }
   finally { submit.disabled = false; }
@@ -536,16 +538,17 @@ $('#forgotForm').addEventListener('submit', async event => {
 
 $('#resetForm').addEventListener('submit', async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   setAuthMessage('');
-  const data = Object.fromEntries(new FormData(event.currentTarget));
+  const data = Object.fromEntries(new FormData(form));
   if (data.password !== data.confirmPassword) { setAuthMessage('Those passwords do not match.'); return; }
   if (!state.recoveryTokens) { setAuthMode('forgot'); setAuthMessage('That reset link is invalid or has expired. Request a new one.'); return; }
-  const submit = $('button[type="submit"]', event.currentTarget);
+  const submit = $('button[type="submit"]', form);
   submit.disabled = true;
   try {
     await api('/api/auth/update-password', { method: 'POST', body: JSON.stringify({ ...state.recoveryTokens, password: data.password }) });
     state.recoveryTokens = null;
-    event.currentTarget.reset();
+    form.reset();
     setAuthMode('login');
     setAuthMessage('Your password has been updated. Sign in with your new password.', 'success');
   } catch (error) { setAuthMessage(error.message); }
