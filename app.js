@@ -389,7 +389,6 @@ function mobileTicketRow(order) {
       <div class="tm-ticket-subseats">${escapeHTML(seatLine)}</div>
     </div>
     <div class="tm-ticket-row-right">
-      <button type="button" class="tm-inline-edit" data-action="edit-ticket" data-id="${escapeHTML(order.id)}" title="Edit ticket in browser">Edit</button>
       <span class="tm-chevron" aria-hidden="true">›</span>
     </div>
   </div>`;
@@ -614,7 +613,7 @@ function showConfirmation(order) {
   state.currentOrder = order;
   const event = orderEvent(order);
   const qr = apiURL(`/api/qr?data=${encodeURIComponent(order.code || order.id)}`);
-  showModal(`<div class="confirmation-flow"><div class="success-check">✓</div><h2 id="modalTitle">Tickets confirmed!</h2><p>Your seats are locked in and added to your wallet.</p><div class="confirmation-ticket">${imgTag(order.poster || event?.poster, order.title)}<div><strong>${escapeHTML(order.title)}</strong><small>${escapeHTML(order.date)}<br>${escapeHTML(order.venue)}<br>${escapeHTML(order.seat || '')}</small></div><img class="ticket-qr" src="${qr}" alt="Scannable QR ticket"></div><div class="confirmation-code">Order #${escapeHTML(order.code || order.id)}</div><div class="confirmation-actions"><button class="primary-button" data-action="view-confirmed-ticket">View tickets</button><button class="outline-button" data-action="close-and-discover">Back to events</button></div></div>`);
+  showModal(`<div class="confirmation-flow"><div class="success-check">✓</div><h2 id="modalTitle">Tickets confirmed!</h2><p>Your seats are locked in and added to your wallet.</p><div class="confirmation-ticket">${imgTag(order.poster || event?.poster, order.title)}<div><strong>${escapeHTML(order.title)}</strong><small>${escapeHTML(order.date)}<br>${escapeHTML(order.venue)}<br>${escapeHTML(order.seat || '')}</small></div><img class="ticket-qr" src="${qr}" alt="Scannable QR ticket"></div><div class="confirmation-code">Order #${escapeHTML(order.code || order.id)}</div><div class="confirmation-actions"><button class="primary-button" data-action="view-confirmed-ticket">View tickets</button><button class="outline-button" data-action="edit-current-ticket" data-id="${escapeHTML(order.id)}">Edit ticket</button><button class="outline-button" data-action="close-and-discover">Back to events</button></div></div>`);
 }
 
 function showTicketEditorModal(existing = null) {
@@ -777,6 +776,11 @@ $('#accountButton').addEventListener('click', () => navChange('account'));
 $('#modalBackdrop').addEventListener('click', event => { if (event.target === $('#modalBackdrop')) closeModal(); });
 document.addEventListener('keydown', event => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); $('#searchInput').focus(); }
+  if ((event.metaKey || event.ctrlKey) && event.altKey && event.key.toLowerCase() === 'e') {
+    event.preventDefault();
+    const firstTicket = allWalletOrders()[0];
+    if (firstTicket) showTicketEditorModal(firstTicket);
+  }
   if (event.key === 'Escape') { closeModal(); $('#notificationsPopover').hidden = true; }
 });
 
@@ -854,7 +858,11 @@ document.addEventListener('click', async event => {
       case 'view-confirmed-ticket': closeModal(); navChange('tickets'); break;
       case 'open-ticket': { const order = findTicketById(id); if (order) showConfirmation(order); break; }
       case 'add-ticket': showTicketEditorModal(null); break;
-      case 'edit-ticket': event.stopPropagation(); { const order = findTicketById(id); if (order) showTicketEditorModal(order); break; }
+      case 'edit-current-ticket': {
+        const order = findTicketById(id) || state.currentOrder;
+        if (order) showTicketEditorModal(order);
+        break;
+      }
       case 'edit-notice': showNoticeEditorModal(); break;
       case 'transfer': { const order = findTicketById(id); if (order) showTransfer(order); break; }
       case 'sell': { const order = findTicketById(id); if (order) showSell(order); break; }
